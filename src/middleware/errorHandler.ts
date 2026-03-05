@@ -22,7 +22,9 @@ export const errorHandler = (
       return;
     }
     if (err["name"] === "MongoServerError" && err["code"] === 11000) {
-      res.status(409).json({ success: false, message: "Duplicate field value." });
+      res
+        .status(409)
+        .json({ success: false, message: "Duplicate field value." });
       return;
     }
   }

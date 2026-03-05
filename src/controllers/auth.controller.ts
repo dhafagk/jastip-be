@@ -1,18 +1,62 @@
 import { Request, Response, NextFunction } from "express";
-import { registerUser, loginUser } from "../services/auth.service";
-import { RegisterInput, LoginInput } from "../validators/auth.validator";
+import {
+  registerCustomer,
+  registerSeller,
+  registerAdmin,
+  loginUser,
+} from "../services/auth.service";
+import {
+  CustomerRegisterInput,
+  SellerRegisterInput,
+  AdminRegisterInput,
+  LoginInput,
+} from "../validators/auth.validator";
 import { ApiResponse } from "../types";
 
-export const register = async (
-  req: Request<Record<string, never>, ApiResponse, RegisterInput>,
+export const registerCustomerHandler = async (
+  req: Request<Record<string, never>, ApiResponse, CustomerRegisterInput>,
   res: Response<ApiResponse>,
   next: NextFunction,
 ): Promise<void> => {
   try {
-    const data = await registerUser(req.body);
+    const data = await registerCustomer(req.body);
+    res.status(201).json({
+      success: true,
+      message: "Customer registered successfully.",
+      data,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const registerSellerHandler = async (
+  req: Request<Record<string, never>, ApiResponse, SellerRegisterInput>,
+  res: Response<ApiResponse>,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    const data = await registerSeller(req.body);
+    res.status(201).json({
+      success: true,
+      message: "Seller registered successfully.",
+      data,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const registerAdminHandler = async (
+  req: Request<Record<string, never>, ApiResponse, AdminRegisterInput>,
+  res: Response<ApiResponse>,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    const data = await registerAdmin(req.body);
     res
       .status(201)
-      .json({ success: true, message: "User registered successfully.", data });
+      .json({ success: true, message: "Admin registered successfully.", data });
   } catch (err) {
     next(err);
   }

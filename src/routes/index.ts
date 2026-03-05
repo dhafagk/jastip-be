@@ -10,11 +10,21 @@ router.get("/", (_req: Request, res: Response) => {
       version: "1.0.0",
       endpoints: {
         auth: {
-          register: "POST /auth/register",
+          registerCustomer: "POST /auth/register/customer",
+          registerSeller: "POST /auth/register/seller",
+          registerAdmin:
+            "POST /auth/register/admin  [requires admin Bearer token]",
           login: "POST /auth/login",
         },
         users: {
           me: "GET /users/me  [requires Bearer token]",
+        },
+        sellers: {
+          list: "GET /sellers  [?city=&isVerified=&minRating=&page=&limit=]",
+          getOne: "GET /sellers/:id",
+          create: "POST /sellers  [requires Bearer token]",
+          update: "PATCH /sellers/:id  [requires Bearer token]",
+          delete: "DELETE /sellers/:id  [requires Bearer token]",
         },
       },
     },

@@ -1,10 +1,13 @@
-import { Schema, model, Document } from "mongoose";
+import { Schema, model, Document, Types } from "mongoose";
 import bcrypt from "bcryptjs";
+import { Role } from "../types";
 
 export interface IUser extends Document {
   name: string;
   email: string;
   password: string;
+  role: Role;
+  sellerId?: Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
   comparePassword(candidate: string): Promise<boolean>;
@@ -30,6 +33,17 @@ const userSchema = new Schema<IUser>(
       required: [true, "Password is required"],
       minlength: [6, "Password must be at least 6 characters"],
       select: false,
+    },
+    role: {
+      type: String,
+      enum: ["admin", "seller", "customer"],
+      required: true,
+      default: "customer",
+    },
+    sellerId: {
+      type: Schema.Types.ObjectId,
+      ref: "Seller",
+      default: undefined,
     },
   },
   { timestamps: true },
