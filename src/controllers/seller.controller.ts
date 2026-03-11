@@ -1,6 +1,11 @@
 import { Request, Response, NextFunction } from 'express'
 import * as sellerService from '../services/seller.service'
-import { CreateSellerInput, UpdateSellerInput, ListSellersQuery } from '../validators/seller.validator'
+import {
+  CreateSellerInput,
+  UpdateSellerInput,
+  ListSellersQuery,
+  AddSellerReviewInput,
+} from '../validators/seller.validator'
 import { AddressInput, PartialAddressInput } from '../validators/address.validator'
 import { ApiResponse, AppError, AuthRequest } from '../types'
 
@@ -122,6 +127,62 @@ export const setDefaultAddress = async (
       message: 'Default address set.',
       data: { seller },
     })
+  } catch (err) {
+    next(err)
+  }
+}
+
+export const addReview = async (req: AuthRequest, res: Response<ApiResponse>, next: NextFunction): Promise<void> => {
+  try {
+    if (!req.user) throw new AppError(401, 'Unauthorized.')
+    const seller = await sellerService.addReview(
+      req.params['id'] as string,
+      req.body as AddSellerReviewInput,
+      req.user.id
+    )
+    res.status(201).json({ success: true, message: 'Review added.', data: { seller } })
+  } catch (err) {
+    next(err)
+  }
+}
+
+// --- Verification ---
+
+export const requestVerification = async (
+  req: AuthRequest,
+  res: Response<ApiResponse>,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    if (!req.user) throw new AppError(401, 'Unauthorized.')
+    const seller = await sellerService.requestVerification(req.params['id'] as string)
+    res.json({ success: true, message: 'Verification request submitted. Pending admin approval.', data: { seller } })
+  } catch (err) {
+    next(err)
+  }
+}
+
+export const approveVerification = async (
+  req: AuthRequest,
+  res: Response<ApiResponse>,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const seller = await sellerService.approveVerification(req.params['id'] as string)
+    res.json({ success: true, message: 'Seller officially verified.', data: { seller } })
+  } catch (err) {
+    next(err)
+  }
+}
+
+export const rejectVerification = async (
+  req: AuthRequest,
+  res: Response<ApiResponse>,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const seller = await sellerService.rejectVerification(req.params['id'] as string)
+    res.json({ success: true, message: 'Seller verification rejected.', data: { seller } })
   } catch (err) {
     next(err)
   }

@@ -23,6 +23,7 @@ export const createProductSchema = z.object({
   originCity: z.string().min(1, 'Origin city is required'),
   currency: z.string().length(3, 'Currency must be a 3-letter code').default('IDR'),
   quantity: z.number().int().min(0, 'Quantity cannot be negative').default(0),
+  isUnlimitedQuota: z.boolean().default(false),
   status: z.enum(productStatusValues).default('available'),
   variants: z.array(variantSchema).default([]),
   tags: z.array(z.string()).default([]),

@@ -50,6 +50,23 @@ const orderSchema = new Schema<IOrder>(
       required: true,
       min: 0,
     },
+    depositAmount: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
+    remainingBalance: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
+    paymentStatus: {
+      type: String,
+      enum: ['unpaid', 'deposit_paid', 'fully_paid'],
+      default: 'unpaid',
+      required: true,
+      index: true,
+    },
     shippingAddress: {
       type: Schema.Types.Mixed, // Storing a copy of the IAddress object
       required: true,

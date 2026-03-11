@@ -1,5 +1,18 @@
-import { Schema, model, Types } from 'mongoose'
-import { ISeller, IAddress } from '../types'
+import { Schema, model } from 'mongoose'
+import { ISeller, IAddress, IReview } from '../types'
+
+const reviewSchema = new Schema<IReview>(
+  {
+    userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    userName: { type: String, required: true, trim: true },
+    userAvatarUrl: { type: String, required: true, default: '' },
+    rating: { type: Number, required: true, min: 1, max: 5 },
+    comment: { type: String, required: true, trim: true },
+    imageUrls: { type: [String], default: [] },
+    createdAt: { type: Date, default: Date.now },
+  },
+  { _id: true }
+)
 
 const addressSchema = new Schema<IAddress>(
   {
@@ -58,6 +71,16 @@ const sellerSchema = new Schema<ISeller>(
       default: false,
       index: true,
     },
+    verificationStatus: {
+      type: String,
+      enum: ['unverified', 'pending', 'verified', 'rejected'],
+      default: 'unverified',
+      required: true,
+      index: true,
+    },
+    verificationRequestDate: {
+      type: Date,
+    },
     balance: {
       type: Number,
       required: true,
@@ -72,6 +95,7 @@ const sellerSchema = new Schema<ISeller>(
       type: [String],
       default: [],
     },
+    reviews: { type: [reviewSchema], default: [] },
     addresses: { type: [addressSchema], default: [] },
   },
   { timestamps: true }

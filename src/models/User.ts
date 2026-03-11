@@ -59,6 +59,8 @@ const userSchema = new Schema<IUser>(
       type: String,
       default: '',
     },
+    favoriteSellers: [{ type: Schema.Types.ObjectId, ref: 'Seller' }],
+    favoriteProducts: [{ type: Schema.Types.ObjectId, ref: 'Product' }],
     addresses: { type: [addressSchema], default: [] },
   },
   { timestamps: true }

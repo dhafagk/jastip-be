@@ -105,3 +105,39 @@ export const setDefaultAddress = async (
     next(err)
   }
 }
+
+// --- Favorites ---
+
+export const toggleFavoriteSeller = async (
+  req: AuthRequest,
+  res: Response<ApiResponse>,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    if (!req.user) {
+      next(new AppError(401, 'Unauthorized.'))
+      return
+    }
+    const user = await userService.toggleFavoriteSeller(req.user.id, req.params['sellerId'] as string)
+    res.json({ success: true, message: 'Favorite seller toggled.', data: { user } })
+  } catch (err) {
+    next(err)
+  }
+}
+
+export const toggleFavoriteProduct = async (
+  req: AuthRequest,
+  res: Response<ApiResponse>,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    if (!req.user) {
+      next(new AppError(401, 'Unauthorized.'))
+      return
+    }
+    const user = await userService.toggleFavoriteProduct(req.user.id, req.params['productId'] as string)
+    res.json({ success: true, message: 'Favorite product toggled.', data: { user } })
+  } catch (err) {
+    next(err)
+  }
+}

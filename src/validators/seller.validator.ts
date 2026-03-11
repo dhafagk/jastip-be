@@ -36,6 +36,14 @@ export const listSellersQuerySchema = z.object({
     .optional(),
 })
 
+export const addSellerReviewSchema = z.object({
+  userAvatarUrl: z.string().url('User avatar URL must be valid').optional().default(''),
+  rating: z.number().min(1, 'Rating must be at least 1').max(5, 'Rating must be at most 5'),
+  comment: z.string().min(1, 'Comment is required'),
+  imageUrls: z.array(z.string().url('Each image URL must be valid')).default([]),
+})
+
 export type CreateSellerInput = z.infer<typeof createSellerSchema>
 export type UpdateSellerInput = z.infer<typeof updateSellerSchema>
 export type ListSellersQuery = z.infer<typeof listSellersQuerySchema>
+export type AddSellerReviewInput = z.infer<typeof addSellerReviewSchema>

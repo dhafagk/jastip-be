@@ -10,6 +10,8 @@ import {
   updateAddress,
   removeAddress,
   setDefaultAddress,
+  toggleFavoriteSeller,
+  toggleFavoriteProduct,
 } from '../controllers/user.controller'
 
 const router = Router()
@@ -23,5 +25,9 @@ router.post('/me/addresses', validate(addAddressSchema), addAddress)
 router.patch('/me/addresses/:addressId', validate(updateAddressSchema), updateAddress)
 router.patch('/me/addresses/:addressId/default', setDefaultAddress)
 router.delete('/me/addresses/:addressId', removeAddress)
+
+// Favorites
+router.post('/me/favorites/sellers/:sellerId', toggleFavoriteSeller)
+router.post('/me/favorites/products/:productId', toggleFavoriteProduct)
 
 export default router

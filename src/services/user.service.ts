@@ -94,3 +94,35 @@ export const setDefaultAddress = async (userId: string, addressId: string) => {
   await user.save()
   return user
 }
+
+// --- Favorites Management ---
+
+export const toggleFavoriteSeller = async (userId: string, sellerId: string) => {
+  const user = await User.findById(userId).select('-password')
+  if (!user) throw new AppError(404, 'User not found.')
+
+  const index = user.favoriteSellers.findIndex((id) => id.toString() === sellerId)
+  if (index === -1) {
+    user.favoriteSellers.push(new Types.ObjectId(sellerId))
+  } else {
+    user.favoriteSellers.splice(index, 1)
+  }
+
+  await user.save()
+  return user
+}
+
+export const toggleFavoriteProduct = async (userId: string, productId: string) => {
+  const user = await User.findById(userId).select('-password')
+  if (!user) throw new AppError(404, 'User not found.')
+
+  const index = user.favoriteProducts.findIndex((id) => id.toString() === productId)
+  if (index === -1) {
+    user.favoriteProducts.push(new Types.ObjectId(productId))
+  } else {
+    user.favoriteProducts.splice(index, 1)
+  }
+
+  await user.save()
+  return user
+}

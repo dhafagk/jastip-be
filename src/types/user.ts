@@ -9,6 +9,8 @@ export interface IUser extends Document {
   role: Role
   avatarUrl?: string
   sellerId?: Types.ObjectId
+  favoriteSellers: Types.ObjectId[]
+  favoriteProducts: Types.ObjectId[]
   addresses: Types.DocumentArray<IAddress>
   createdAt: Date
   updatedAt: Date

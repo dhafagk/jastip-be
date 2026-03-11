@@ -1,12 +1,11 @@
 import { Types } from 'mongoose'
 import Order from '../models/Order'
 import Product from '../models/Product'
-import Cart from '../models/Cart'
 import User from '../models/User'
 import Seller from '../models/Seller'
 import WalletTransaction from '../models/WalletTransaction'
 import { AppError } from '../types'
-import { CheckoutCartInput, CheckoutDirectInput } from '../validators/order.validator'
+import { CheckoutDirectInput } from '../validators/order.validator'
 
 export const checkoutDirect = async (userId: string, input: CheckoutDirectInput) => {
   const user = await User.findById(userId)
@@ -23,7 +22,7 @@ export const checkoutDirect = async (userId: string, input: CheckoutDirectInput)
   }
 
   // Stock check
-  if (product.quantity < input.quantity) {
+  if (!product.isUnlimitedQuota && product.quantity < input.quantity) {
     throw new AppError(400, `Insufficient stock for product ${product.name}.`)
   }
 
@@ -36,7 +35,9 @@ export const checkoutDirect = async (userId: string, input: CheckoutDirectInput)
   }
 
   // Reserve stock
-  product.quantity -= input.quantity
+  if (!product.isUnlimitedQuota) {
+    product.quantity -= input.quantity
+  }
   if (input.variantName) {
     const variantIndex = product.variants.findIndex((v) => v.name === input.variantName)
     product.variants[variantIndex].stock -= input.quantity
@@ -48,6 +49,11 @@ export const checkoutDirect = async (userId: string, input: CheckoutDirectInput)
     product.price + (input.variantName ? product.variants.find((v) => v.name === input.variantName)!.extraPrice : 0)
   const totalProductPrice = price * input.quantity
   const totalServiceFee = product.serviceFee * input.quantity
+  const grandTotal = totalProductPrice + totalServiceFee
+
+  // MVP Standard: 50% Down Payment to lock the PO
+  const depositAmount = grandTotal * 0.5
+  const remainingBalance = grandTotal - depositAmount
 
   // Create Order
   const order = await Order.create({
@@ -64,146 +70,16 @@ export const checkoutDirect = async (userId: string, input: CheckoutDirectInput)
     ],
     totalProductPrice,
     totalServiceFee,
-    grandTotal: totalProductPrice + totalServiceFee,
+    grandTotal,
+    depositAmount,
+    remainingBalance,
+    paymentStatus: 'unpaid',
     shippingAddress: address,
     notes: input.notes,
     status: 'pending',
   })
 
   return order
-}
-
-export const checkoutFromCart = async (userId: string, input: CheckoutCartInput) => {
-  const user = await User.findById(userId)
-  if (!user) throw new AppError(404, 'User not found.')
-
-  const address = user.addresses.id(input.shippingAddressId)
-  if (!address) throw new AppError(404, 'Shipping address not found in user profile.')
-
-  const cart = await Cart.findOne({ userId }).populate('items.productId')
-  if (!cart || cart.items.length === 0) {
-    throw new AppError(400, 'Cart is empty.')
-  }
-
-  // Filter items if specific IDs provided
-  let itemsToCheckout = cart.items
-  if (input.cartItemIds && input.cartItemIds.length > 0) {
-    itemsToCheckout = cart.items.filter((item) =>
-      input.cartItemIds!.includes(item._id!.toString())
-    ) as Types.DocumentArray<any>
-    if (itemsToCheckout.length === 0) {
-      throw new AppError(400, 'None of the requested items were found in the cart.')
-    }
-  }
-
-  // Validate stock
-  const cartItemsWithProducts = itemsToCheckout.filter((item) => item.productId != null)
-
-  // Group by Seller ID
-  const sellerGroups: Record<string, any[]> = {}
-
-  for (const item of cartItemsWithProducts) {
-    const product = item.productId as any // Populated
-
-    if (product.status !== 'available' || !product.isAvailableForOrder) {
-      throw new AppError(400, `Product ${product.name} is not available for order.`)
-    }
-
-    // We only have the snapshot of product. We must lock/double-check it, but standard findById is safer for stock.
-  }
-
-  // Actually, we should fetch products cleanly to avoid race conditions and modify stock.
-  const productIds = cartItemsWithProducts.map((i) => i.productId._id)
-  const products = await Product.find({ _id: { $in: productIds } })
-  const productMap = new Map(products.map((p) => [p._id.toString(), p]))
-
-  // Group items by seller and check stock
-  for (const item of cartItemsWithProducts) {
-    const product = productMap.get(item.productId._id.toString())
-    if (!product) throw new AppError(404, 'Cart contains a product that no longer exists.')
-
-    if (product.quantity < item.quantity) {
-      throw new AppError(400, `Insufficient stock for product ${product.name}.`)
-    }
-
-    let price = product.price
-    if (item.variantName) {
-      const variant = product.variants.find((v) => v.name === item.variantName)
-      if (!variant) throw new AppError(400, `Variant ${item.variantName} not found for ${product.name}.`)
-      if (variant.stock < item.quantity) {
-        throw new AppError(400, `Insufficient stock for variant ${variant.name}.`)
-      }
-      price += variant.extraPrice
-    }
-
-    const sellerId = product.seller.toString()
-    if (!sellerGroups[sellerId]) sellerGroups[sellerId] = []
-
-    sellerGroups[sellerId].push({
-      item,
-      product,
-      price,
-      serviceFee: product.serviceFee,
-    })
-  }
-
-  const createdOrders = []
-
-  // Create Orders and Decrease Stock
-  for (const [sellerId, itemsData] of Object.entries(sellerGroups)) {
-    let totalProductPrice = 0
-    let totalServiceFee = 0
-    const orderItems = []
-
-    for (const data of itemsData) {
-      const product = data.product
-
-      // Decrease stock
-      product.quantity -= data.item.quantity
-      if (data.item.variantName) {
-        const variantIndex = product.variants.findIndex((v: any) => v.name === data.item.variantName)
-        product.variants[variantIndex].stock -= data.item.quantity
-      }
-      await product.save()
-
-      const pTotal = data.price * data.item.quantity
-      const sTotal = data.serviceFee * data.item.quantity
-
-      totalProductPrice += pTotal
-      totalServiceFee += sTotal
-
-      orderItems.push({
-        productId: product._id,
-        quantity: data.item.quantity,
-        variantName: data.item.variantName,
-        price: data.price,
-        serviceFee: data.serviceFee,
-      })
-    }
-
-    const order = await Order.create({
-      userId,
-      sellerId,
-      items: orderItems,
-      totalProductPrice,
-      totalServiceFee,
-      grandTotal: totalProductPrice + totalServiceFee,
-      shippingAddress: address,
-      notes: input.notes,
-      status: 'pending',
-    })
-
-    createdOrders.push(order)
-  }
-
-  // Remove checked out items from cart
-  const checkedOutItemIds = cartItemsWithProducts.map((i) => i._id!.toString())
-  cart.items = cart.items.filter(
-    (item) => !checkedOutItemIds.includes(item._id!.toString())
-  ) as Types.DocumentArray<any>
-  await cart.save()
-
-  return createdOrders
 }
 
 export const getUserOrders = async (userId: string) => {
@@ -241,13 +117,47 @@ export const processPayment = async (orderId: string, userId: string) => {
   const order = await Order.findOne({ _id: orderId, userId })
   if (!order) throw new AppError(404, 'Order not found.')
 
-  if (order.status !== 'pending') {
-    throw new AppError(400, 'Only pending orders can be paid for.')
+  if (order.status === 'cancelled') {
+    throw new AppError(400, 'Cannot pay for a cancelled order.')
   }
 
-  order.status = 'processing'
-  await order.save()
-  return order
+  // State 1: Paying the initial Deposit (DP)
+  if (order.paymentStatus === 'unpaid') {
+    order.paymentStatus = 'deposit_paid'
+    order.status = 'processing' // Officially locked for the seller to source
+    await order.save()
+
+    // ESCROW: Instantly release DP to Verified Sellers so they can buy the item overseas
+    const seller = await Seller.findById(order.sellerId)
+    if (seller && seller.isVerified) {
+      seller.balance += order.depositAmount
+      await seller.save()
+
+      await WalletTransaction.create({
+        sellerId: seller._id,
+        orderId: order._id,
+        type: 'earning',
+        amount: order.depositAmount,
+        status: 'completed',
+        notes: 'Verified Seller: Instant Deposit (DP) Release',
+      })
+    }
+
+    return order
+  }
+
+  // State 2: Paying the remaining balance (usually when arrived_locally)
+  if (order.paymentStatus === 'deposit_paid') {
+    if (order.status !== 'arrived_locally') {
+      throw new AppError(400, 'Remaining balance is typically paid when the item has arrived locally.')
+    }
+    order.paymentStatus = 'fully_paid'
+    order.remainingBalance = 0
+    await order.save()
+    return order
+  }
+
+  throw new AppError(400, 'Order is already fully paid.')
 }
 
 export const cancelOrder = async (orderId: string, userId: string) => {
@@ -262,7 +172,9 @@ export const cancelOrder = async (orderId: string, userId: string) => {
   for (const item of order.items) {
     const product = await Product.findById(item.productId)
     if (product) {
-      product.quantity += item.quantity
+      if (!product.isUnlimitedQuota) {
+        product.quantity += item.quantity
+      }
       if (item.variantName) {
         const variantIndex = product.variants.findIndex((v: any) => v.name === item.variantName)
         if (variantIndex > -1) {
@@ -294,18 +206,24 @@ export const completeOrder = async (orderId: string, userId: string) => {
   const seller = await Seller.findById(order.sellerId)
   if (!seller) throw new AppError(404, 'Seller not found during order completion.')
 
-  const earningAmount = order.totalProductPrice + order.totalServiceFee
-  seller.balance += earningAmount
-  await seller.save()
+  // ESCROW: If verified, they already got the DP. We only release the remaining balance.
+  // If unverified, they get the full grand total now.
+  const earningAmount = seller.isVerified ? order.remainingBalance : order.grandTotal
 
-  // Record the earning
-  await WalletTransaction.create({
-    sellerId: seller._id,
-    orderId: order._id,
-    type: 'earning',
-    amount: earningAmount,
-    status: 'completed',
-  })
+  if (earningAmount > 0) {
+    seller.balance += earningAmount
+    await seller.save()
+
+    // Record the earning
+    await WalletTransaction.create({
+      sellerId: seller._id,
+      orderId: order._id,
+      type: 'earning',
+      amount: earningAmount,
+      status: 'completed',
+      notes: seller.isVerified ? 'Verified Seller: Final Balance Release' : 'Unverified Seller: Full Escrow Release',
+    })
+  }
 
   return order
 }

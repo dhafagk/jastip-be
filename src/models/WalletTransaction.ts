@@ -30,6 +30,10 @@ const walletTransactionSchema = new Schema<IWalletTransaction>(
       default: 'pending',
       required: true,
     },
+    notes: {
+      type: String,
+      trim: true,
+    },
   },
   { timestamps: true }
 )

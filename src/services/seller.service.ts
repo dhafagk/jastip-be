@@ -1,8 +1,15 @@
 import Seller from '../models/Seller'
+import User from '../models/User'
+import Order from '../models/Order'
 import { IAddress } from '../types'
 import { AppError } from '../types'
 import { AddressInput, PartialAddressInput } from '../validators/address.validator'
-import { CreateSellerInput, UpdateSellerInput, ListSellersQuery } from '../validators/seller.validator'
+import {
+  CreateSellerInput,
+  UpdateSellerInput,
+  ListSellersQuery,
+  AddSellerReviewInput,
+} from '../validators/seller.validator'
 
 const DEFAULT_LIMIT = 10
 const MAX_LIMIT = 100
@@ -135,5 +142,107 @@ export const setDefaultAddress = async (sellerId: string, addressId: string) => 
   address.isDefault = true
 
   await seller.save()
+  return seller
+}
+
+// --- Reviews ---
+
+export const addReview = async (sellerId: string, input: AddSellerReviewInput, userId: string) => {
+  const [seller, user, order] = await Promise.all([
+    Seller.findById(sellerId),
+    User.findById(userId).select('name avatarUrl'),
+    Order.findOne({ userId, sellerId, status: 'delivered' }), // Strict Escrow Trust Rule
+  ])
+
+  if (!seller) throw new AppError(404, 'Seller not found.')
+  if (!user) throw new AppError(404, 'User not found.')
+
+  if (!order) {
+    throw new AppError(403, 'You can only review a seller after successfully completing an order with them.')
+  }
+
+  const alreadyReviewed = seller.reviews.some((r) => r.userId.toString() === userId)
+  if (alreadyReviewed) {
+    throw new AppError(409, 'You have already reviewed this seller.')
+  }
+
+  const review = {
+    userId: user._id,
+    userName: user.name,
+    userAvatarUrl: user.avatarUrl ?? '',
+    rating: input.rating,
+    comment: input.comment,
+    imageUrls: input.imageUrls,
+    createdAt: new Date(),
+  }
+
+  seller.reviews.push(review)
+
+  // Re-calculate the average dynamic rating
+  const totalRating = seller.reviews.reduce((acc, curr) => acc + curr.rating, 0)
+  seller.rating = Math.round((totalRating / seller.reviews.length) * 10) / 10
+
+  await seller.save()
+  return seller
+}
+
+// --- Verification ---
+
+export const requestVerification = async (sellerId: string) => {
+  const seller = await Seller.findById(sellerId)
+  if (!seller) throw new AppError(404, 'Seller not found.')
+
+  if (seller.isVerified) {
+    throw new AppError(400, 'Seller is already verified.')
+  }
+
+  if (seller.verificationStatus === 'pending') {
+    throw new AppError(400, 'Verification request is already pending.')
+  }
+
+  // Enforce MVP Rule: Must have completely fulfilled at least 2 Jastip Orders!
+  const completedOrdersCount = await Order.countDocuments({ sellerId, status: 'delivered' })
+
+  if (completedOrdersCount < 2) {
+    throw new AppError(
+      403,
+      `You must successfully fulfill at least 2 orders before requesting verification. Currently fulfilled: ${completedOrdersCount}`
+    )
+  }
+
+  seller.verificationStatus = 'pending'
+  seller.verificationRequestDate = new Date()
+  await seller.save()
+
+  return seller
+}
+
+export const approveVerification = async (sellerId: string) => {
+  const seller = await Seller.findById(sellerId)
+  if (!seller) throw new AppError(404, 'Seller not found.')
+
+  if (seller.verificationStatus !== 'pending') {
+    throw new AppError(400, 'Seller must have a pending verification request to be approved.')
+  }
+
+  seller.verificationStatus = 'verified'
+  seller.isVerified = true
+  await seller.save()
+
+  return seller
+}
+
+export const rejectVerification = async (sellerId: string) => {
+  const seller = await Seller.findById(sellerId)
+  if (!seller) throw new AppError(404, 'Seller not found.')
+
+  if (seller.verificationStatus !== 'pending') {
+    throw new AppError(400, 'Seller must have a pending verification request to be rejected.')
+  }
+
+  seller.verificationStatus = 'rejected'
+  seller.isVerified = false
+  await seller.save()
+
   return seller
 }

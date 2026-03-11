@@ -3,7 +3,7 @@ import * as orderController from '../controllers/order.controller'
 import { authenticate } from '../middleware/auth'
 import { authorize, authorizeSeller } from '../middleware/authorize'
 import { validate } from '../middleware/validate'
-import { checkoutDirectSchema, checkoutCartSchema, updateOrderStatusSchema } from '../validators/order.validator'
+import { checkoutDirectSchema, updateOrderStatusSchema } from '../validators/order.validator'
 
 const router = Router()
 
@@ -14,13 +14,6 @@ router.post(
   authorize('customer'),
   validate(checkoutDirectSchema),
   orderController.checkoutDirect
-)
-router.post(
-  '/checkout/cart',
-  authenticate,
-  authorize('customer'),
-  validate(checkoutCartSchema),
-  orderController.checkoutCart
 )
 router.get('/me', authenticate, authorize('customer'), orderController.getMyOrders)
 

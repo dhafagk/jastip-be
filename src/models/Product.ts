@@ -79,6 +79,12 @@ const productSchema = new Schema<IProduct>(
       min: [0, 'Quantity cannot be negative'],
       default: 0,
     },
+    isUnlimitedQuota: {
+      type: Boolean,
+      required: true,
+      default: false,
+      index: true,
+    },
     status: {
       type: String,
       enum: ['available', 'ordered', 'purchasing', 'arrived_locally', 'onTheWay', 'delivered', 'cancelled'],

@@ -3,7 +3,6 @@ import authRoutes from './auth'
 import userRoutes from './users'
 import sellerRoutes from './sellers'
 import productRoutes from './products'
-import cartRoutes from './cart'
 import orderRoutes from './orders'
 import walletRoutes from './wallet'
 import uploadRoutes from './upload'
@@ -84,7 +83,6 @@ router.use('/auth', authRoutes)
 router.use('/users', userRoutes)
 router.use('/sellers', sellerRoutes)
 router.use('/products', productRoutes)
-router.use('/cart', cartRoutes)
 router.use('/orders', orderRoutes)
 router.use('/wallet', walletRoutes)
 router.use('/upload', uploadRoutes)

@@ -25,6 +25,9 @@ export interface IOrder extends Document {
   totalProductPrice: number
   totalServiceFee: number
   grandTotal: number
+  depositAmount: number
+  remainingBalance: number
+  paymentStatus: 'unpaid' | 'deposit_paid' | 'fully_paid'
   shippingAddress: IAddress
   status: OrderStatus
   courier?: string

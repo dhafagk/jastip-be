@@ -37,6 +37,7 @@ export interface IProduct extends Document {
   originCity: string
   currency: string
   quantity: number
+  isUnlimitedQuota: boolean
   status: ProductStatus
   seller: Types.ObjectId
   reviews: IReview[]

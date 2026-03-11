@@ -1,7 +1,7 @@
 import { Response, NextFunction } from 'express'
 import * as orderService from '../services/order.service'
 import { AuthRequest, ApiResponse, AppError } from '../types'
-import { CheckoutDirectInput, CheckoutCartInput, UpdateOrderStatusInput } from '../validators/order.validator'
+import { CheckoutDirectInput, UpdateOrderStatusInput } from '../validators/order.validator'
 
 export const checkoutDirect = async (
   req: AuthRequest,
@@ -12,16 +12,6 @@ export const checkoutDirect = async (
     if (!req.user) throw new AppError(401, 'Unauthorized.')
     const order = await orderService.checkoutDirect(req.user.id, req.body as CheckoutDirectInput)
     res.status(201).json({ success: true, message: 'Order created successfully.', data: { order } })
-  } catch (err) {
-    next(err)
-  }
-}
-
-export const checkoutCart = async (req: AuthRequest, res: Response<ApiResponse>, next: NextFunction): Promise<void> => {
-  try {
-    if (!req.user) throw new AppError(401, 'Unauthorized.')
-    const orders = await orderService.checkoutFromCart(req.user.id, req.body as CheckoutCartInput)
-    res.status(201).json({ success: true, message: 'Orders created successfully.', data: { orders } })
   } catch (err) {
     next(err)
   }

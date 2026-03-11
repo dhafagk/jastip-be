@@ -9,6 +9,7 @@ export interface IWalletTransaction extends Document {
   type: WalletTransactionType
   amount: number
   status: WalletTransactionStatus
+  notes?: string
   createdAt: Date
   updatedAt: Date
 }
