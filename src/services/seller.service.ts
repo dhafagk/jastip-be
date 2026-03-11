@@ -19,6 +19,12 @@ export const listSellers = async (query: ListSellersQuery) => {
   if (query.minRating !== undefined) {
     filter['rating'] = { $gte: parseFloat(query.minRating) }
   }
+  if (query.country) {
+    filter['frequentCountries'] = { $regex: query.country, $options: 'i' }
+  }
+  if (query.niche) {
+    filter['productNiches'] = { $regex: query.niche, $options: 'i' }
+  }
 
   const page = parseInt(query.page ?? '1', 10)
   const limit = Math.min(MAX_LIMIT, parseInt(query.limit ?? String(DEFAULT_LIMIT), 10))

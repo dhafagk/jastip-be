@@ -11,6 +11,8 @@ export const createSellerSchema = z.object({
     .min(0, 'Total transactions cannot be negative')
     .default(0),
   isVerified: z.boolean().default(false),
+  frequentCountries: z.array(z.string()).default([]),
+  productNiches: z.array(z.string()).default([]),
 })
 
 export const updateSellerSchema = createSellerSchema.partial()
@@ -22,6 +24,8 @@ export const listSellersQuerySchema = z.object({
     .string()
     .regex(/^\d+(\.\d+)?$/, 'minRating must be a number')
     .optional(),
+  country: z.string().optional(),
+  niche: z.string().optional(),
   page: z
     .string()
     .regex(/^[1-9]\d*$/, 'page must be a positive integer')

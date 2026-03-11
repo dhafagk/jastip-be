@@ -9,5 +9,7 @@ export interface ISeller extends Document {
   totalTransactions: number
   isVerified: boolean
   balance: number
+  frequentCountries: string[]
+  productNiches: string[]
   addresses: Types.DocumentArray<IAddress>
 }

@@ -7,6 +7,7 @@ import cartRoutes from './cart'
 import orderRoutes from './orders'
 import walletRoutes from './wallet'
 import uploadRoutes from './upload'
+import customRequestRoutes from './customRequests'
 
 const router = Router()
 
@@ -87,5 +88,6 @@ router.use('/cart', cartRoutes)
 router.use('/orders', orderRoutes)
 router.use('/wallet', walletRoutes)
 router.use('/upload', uploadRoutes)
+router.use('/custom-requests', customRequestRoutes)
 
 export default router
