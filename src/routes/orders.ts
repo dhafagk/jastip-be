@@ -27,6 +27,10 @@ router.get('/me', authenticate, authorize('customer'), orderController.getMyOrde
 // Mock Payment
 router.post('/:id/payment', authenticate, authorize('customer'), orderController.processPayment)
 
+// Order Lifecycle (Customer)
+router.post('/:id/cancel', authenticate, authorize('customer'), orderController.cancel)
+router.post('/:id/complete', authenticate, authorize('customer'), orderController.complete)
+
 // Seller endpoints
 router.get('/seller/:sellerId', authenticate, orderController.getSellerOrders)
 router.patch(

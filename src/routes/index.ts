@@ -59,6 +59,8 @@ router.get('/', (_req: Request, res: Response) => {
           checkoutCart: 'POST /orders/checkout/cart  [requires customer Bearer token]',
           getMyOrders: 'GET /orders/me  [requires customer Bearer token]',
           processPayment: 'POST /orders/:id/payment  [requires customer Bearer token]',
+          cancel: 'POST /orders/:id/cancel  [requires customer Bearer token]',
+          complete: 'POST /orders/:id/complete  [requires customer Bearer token]',
           getSellerOrders: 'GET /orders/seller/:sellerId  [requires seller/admin Bearer token]',
           updateStatus:
             'PATCH /orders/:id/status  [requires seller Bearer token, body: { status, courier?, trackingNumber? }]',

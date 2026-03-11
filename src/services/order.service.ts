@@ -245,3 +245,45 @@ export const processPayment = async (orderId: string, userId: string) => {
   await order.save()
   return order
 }
+
+export const cancelOrder = async (orderId: string, userId: string) => {
+  const order = await Order.findOne({ _id: orderId, userId })
+  if (!order) throw new AppError(404, 'Order not found.')
+
+  if (order.status !== 'pending') {
+    throw new AppError(400, 'Only pending orders can be cancelled.')
+  }
+
+  // Restore inventory
+  for (const item of order.items) {
+    const product = await Product.findById(item.productId)
+    if (product) {
+      product.quantity += item.quantity
+      if (item.variantName) {
+        const variantIndex = product.variants.findIndex((v: any) => v.name === item.variantName)
+        if (variantIndex > -1) {
+          product.variants[variantIndex].stock += item.quantity
+        }
+      }
+      await product.save()
+    }
+  }
+
+  order.status = 'cancelled'
+  await order.save()
+  return order
+}
+
+export const completeOrder = async (orderId: string, userId: string) => {
+  const order = await Order.findOne({ _id: orderId, userId })
+  if (!order) throw new AppError(404, 'Order not found.')
+
+  if (order.status !== 'shipped') {
+    throw new AppError(400, 'Only shipped orders can be marked as delivered/completed.')
+  }
+
+  order.status = 'delivered'
+  await order.save()
+
+  return order
+}

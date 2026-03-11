@@ -84,3 +84,23 @@ export const processPayment = async (
     next(err)
   }
 }
+
+export const cancel = async (req: AuthRequest, res: Response<ApiResponse>, next: NextFunction): Promise<void> => {
+  try {
+    if (!req.user) throw new AppError(401, 'Unauthorized.')
+    const order = await orderService.cancelOrder(req.params['id'] as string, req.user.id)
+    res.json({ success: true, message: 'Order cancelled successfully.', data: { order } })
+  } catch (err) {
+    next(err)
+  }
+}
+
+export const complete = async (req: AuthRequest, res: Response<ApiResponse>, next: NextFunction): Promise<void> => {
+  try {
+    if (!req.user) throw new AppError(401, 'Unauthorized.')
+    const order = await orderService.completeOrder(req.params['id'] as string, req.user.id)
+    res.json({ success: true, message: 'Order marked as delivered successfully.', data: { order } })
+  } catch (err) {
+    next(err)
+  }
+}
