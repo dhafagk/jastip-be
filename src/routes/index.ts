@@ -26,6 +26,14 @@ router.get("/", (_req: Request, res: Response) => {
           update: "PATCH /sellers/:id  [requires Bearer token]",
           delete: "DELETE /sellers/:id  [requires Bearer token]",
         },
+        products: {
+          list: "GET /products  [?category=&status=&sellerId=&originCity=&tag=&minPrice=&maxPrice=&isAvailableForOrder=&page=&limit=]",
+          getOne: "GET /products/:id",
+          create: "POST /products  [requires seller Bearer token]",
+          update: "PATCH /products/:id  [requires seller/admin Bearer token]",
+          delete: "DELETE /products/:id  [requires seller/admin Bearer token]",
+          addReview: "POST /products/:id/reviews  [requires customer Bearer token]",
+        },
       },
     },
   });

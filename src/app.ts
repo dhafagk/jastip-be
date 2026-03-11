@@ -9,6 +9,7 @@ import indexRouter from "./routes/index";
 import authRouter from "./routes/auth";
 import usersRouter from "./routes/users";
 import sellersRouter from "./routes/sellers";
+import productsRouter from "./routes/products";
 import { errorHandler } from "./middleware/errorHandler";
 
 const app: Application = express();
@@ -39,6 +40,7 @@ app.use("/", indexRouter);
 app.use("/auth", authLimiter, authRouter);
 app.use("/users", usersRouter);
 app.use("/sellers", sellersRouter);
+app.use("/products", productsRouter);
 
 // ── 404 ──────────────────────────────────────────────────────────────────────
 app.use((_req: Request, res: Response) => {
