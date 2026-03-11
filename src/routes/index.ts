@@ -1,42 +1,59 @@
-import { Router, Request, Response } from "express";
+import { Router, Request, Response } from 'express'
+import authRoutes from './auth'
+import userRoutes from './users'
+import sellerRoutes from './sellers'
+import productRoutes from './products'
+import cartRoutes from './cart'
 
-const router = Router();
+const router = Router()
 
-router.get("/", (_req: Request, res: Response) => {
+router.get('/', (_req: Request, res: Response) => {
   res.json({
     success: true,
-    message: "jastip-be API is running.",
+    message: 'jastip-be API is running.',
     data: {
-      version: "1.0.0",
+      version: '1.0.0',
       endpoints: {
         auth: {
-          registerCustomer: "POST /auth/register/customer",
-          registerSeller: "POST /auth/register/seller",
-          registerAdmin:
-            "POST /auth/register/admin  [requires admin Bearer token]",
-          login: "POST /auth/login",
+          registerCustomer: 'POST /auth/register/customer',
+          registerSeller: 'POST /auth/register/seller',
+          registerAdmin: 'POST /auth/register/admin  [requires admin Bearer token]',
+          login: 'POST /auth/login',
         },
         users: {
-          me: "GET /users/me  [requires Bearer token]",
+          me: 'GET /users/me  [requires Bearer token]',
         },
         sellers: {
-          list: "GET /sellers  [?city=&isVerified=&minRating=&page=&limit=]",
-          getOne: "GET /sellers/:id",
-          create: "POST /sellers  [requires Bearer token]",
-          update: "PATCH /sellers/:id  [requires Bearer token]",
-          delete: "DELETE /sellers/:id  [requires Bearer token]",
+          list: 'GET /sellers  [?city=&isVerified=&minRating=&page=&limit=]',
+          getOne: 'GET /sellers/:id',
+          create: 'POST /sellers  [requires Bearer token]',
+          update: 'PATCH /sellers/:id  [requires Bearer token]',
+          delete: 'DELETE /sellers/:id  [requires Bearer token]',
         },
         products: {
-          list: "GET /products  [?category=&status=&sellerId=&originCity=&tag=&minPrice=&maxPrice=&isAvailableForOrder=&page=&limit=]",
-          getOne: "GET /products/:id",
-          create: "POST /products  [requires seller Bearer token]",
-          update: "PATCH /products/:id  [requires seller/admin Bearer token]",
-          delete: "DELETE /products/:id  [requires seller/admin Bearer token]",
-          addReview: "POST /products/:id/reviews  [requires customer Bearer token]",
+          list: 'GET /products  [?category=&status=&sellerId=&originCity=&tag=&minPrice=&maxPrice=&isAvailableForOrder=&page=&limit=]',
+          getOne: 'GET /products/:id',
+          create: 'POST /products  [requires seller Bearer token]',
+          update: 'PATCH /products/:id  [requires seller/admin Bearer token]',
+          delete: 'DELETE /products/:id  [requires seller/admin Bearer token]',
+          addReview: 'POST /products/:id/reviews  [requires customer Bearer token]',
+        },
+        cart: {
+          get: 'GET /cart  [requires customer Bearer token]',
+          add: 'POST /cart  [requires customer Bearer token]',
+          update: 'PATCH /cart/:itemId  [requires customer Bearer token]',
+          remove: 'DELETE /cart/:itemId  [requires customer Bearer token]',
+          clear: 'DELETE /cart  [requires customer Bearer token]',
         },
       },
     },
-  });
-});
+  })
+})
 
-export default router;
+router.use('/auth', authRoutes)
+router.use('/users', userRoutes)
+router.use('/sellers', sellerRoutes)
+router.use('/products', productRoutes)
+router.use('/cart', cartRoutes)
+
+export default router

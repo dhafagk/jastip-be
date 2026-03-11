@@ -1,0 +1,41 @@
+import { Types, Document } from 'mongoose'
+
+export type ProductStatus = 'available' | 'ordered' | 'onTheWay' | 'delivered' | 'cancelled'
+
+export interface IProductVariant {
+  name: string
+  value: string
+  extraPrice: number
+  stock: number
+}
+
+export interface IReview {
+  userId: Types.ObjectId
+  userName: string
+  userAvatarUrl: string
+  rating: number
+  comment: string
+  imageUrls: string[]
+  createdAt: Date
+}
+
+export interface IProduct extends Document {
+  name: string
+  description: string
+  price: number
+  serviceFee: number
+  imageUrls: string[]
+  category: string
+  originCity: string
+  currency: string
+  quantity: number
+  status: ProductStatus
+  seller: Types.ObjectId
+  reviews: IReview[]
+  variants: IProductVariant[]
+  tags: string[]
+  totalSold: number
+  isAvailableForOrder: boolean
+  createdAt: Date
+  updatedAt: Date
+}
