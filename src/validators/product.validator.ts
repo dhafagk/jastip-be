@@ -7,6 +7,7 @@ const variantSchema = z.object({
   value: z.string().min(1, 'Variant value is required'),
   extraPrice: z.number().min(0, 'Extra price cannot be negative').default(0),
   stock: z.number().int().min(0, 'Stock cannot be negative').default(0),
+  imageUrl: z.string().url('Variant image must be a valid URL').optional().or(z.literal('')),
 })
 
 export const createProductSchema = z.object({
@@ -14,7 +15,10 @@ export const createProductSchema = z.object({
   description: z.string().min(1, 'Description is required'),
   price: z.number().min(0, 'Price cannot be negative'),
   serviceFee: z.number().min(0, 'Service fee cannot be negative').default(0),
-  imageUrls: z.array(z.string().url('Each image URL must be valid')).default([]),
+  imageUrls: z
+    .array(z.string().url('Each image URL must be valid'))
+    .max(5, 'Maximum of 5 product images allowed')
+    .default([]),
   category: z.string().min(1, 'Category is required'),
   originCity: z.string().min(1, 'Origin city is required'),
   currency: z.string().length(3, 'Currency must be a 3-letter code').default('IDR'),

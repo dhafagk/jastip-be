@@ -6,6 +6,7 @@ import productRoutes from './products'
 import cartRoutes from './cart'
 import orderRoutes from './orders'
 import walletRoutes from './wallet'
+import uploadRoutes from './upload'
 
 const router = Router()
 
@@ -70,6 +71,9 @@ router.get('/', (_req: Request, res: Response) => {
           getMe: 'GET /wallet/me  [requires seller Bearer token]',
           withdraw: 'POST /wallet/withdraw  [requires seller Bearer token]',
         },
+        upload: {
+          image: 'POST /upload/image  [requires Bearer token, multipart/form-data field "image"]',
+        },
       },
     },
   })
@@ -82,5 +86,6 @@ router.use('/products', productRoutes)
 router.use('/cart', cartRoutes)
 router.use('/orders', orderRoutes)
 router.use('/wallet', walletRoutes)
+router.use('/upload', uploadRoutes)
 
 export default router

@@ -104,7 +104,10 @@ export const deleteProduct = async (id: string, requesterId: string, requesterRo
 }
 
 export const addReview = async (productId: string, input: AddReviewInput, userId: string) => {
-  const [product, user] = await Promise.all([Product.findById(productId), User.findById(userId).select('name')])
+  const [product, user] = await Promise.all([
+    Product.findById(productId),
+    User.findById(userId).select('name avatarUrl'),
+  ])
 
   if (!product) throw new AppError(404, 'Product not found.')
   if (!user) throw new AppError(404, 'User not found.')
@@ -117,7 +120,7 @@ export const addReview = async (productId: string, input: AddReviewInput, userId
   const review = {
     userId: new Types.ObjectId(userId),
     userName: user.name,
-    userAvatarUrl: input.userAvatarUrl ?? '',
+    userAvatarUrl: user.avatarUrl ?? '',
     rating: input.rating,
     comment: input.comment,
     imageUrls: input.imageUrls,

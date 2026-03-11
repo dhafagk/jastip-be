@@ -7,6 +7,7 @@ const variantSchema = new Schema<IProductVariant>(
     value: { type: String, required: true, trim: true },
     extraPrice: { type: Number, required: true, min: 0, default: 0 },
     stock: { type: Number, required: true, min: 0, default: 0 },
+    imageUrl: { type: String, default: '' },
   },
   { _id: true }
 )

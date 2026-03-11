@@ -2,12 +2,21 @@ import { Router } from 'express'
 import { authenticate } from '../middleware/auth'
 import { validate } from '../middleware/validate'
 import { addAddressSchema, updateAddressSchema } from '../validators/address.validator'
-import { getMe, addAddress, updateAddress, removeAddress, setDefaultAddress } from '../controllers/user.controller'
+import { updateProfileSchema } from '../validators/user.validator'
+import {
+  getMe,
+  updateProfile,
+  addAddress,
+  updateAddress,
+  removeAddress,
+  setDefaultAddress,
+} from '../controllers/user.controller'
 
 const router = Router()
 
 router.use(authenticate)
 router.get('/me', getMe)
+router.patch('/me', validate(updateProfileSchema), updateProfile)
 
 // Address Management
 router.post('/me/addresses', validate(addAddressSchema), addAddress)

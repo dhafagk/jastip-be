@@ -7,6 +7,7 @@ export interface IUser extends Document {
   email: string
   password: string
   role: Role
+  avatarUrl?: string
   sellerId?: Types.ObjectId
   addresses: Types.DocumentArray<IAddress>
   createdAt: Date

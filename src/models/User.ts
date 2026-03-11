@@ -55,6 +55,10 @@ const userSchema = new Schema<IUser>(
       ref: 'Seller',
       default: undefined,
     },
+    avatarUrl: {
+      type: String,
+      default: '',
+    },
     addresses: { type: [addressSchema], default: [] },
   },
   { timestamps: true }

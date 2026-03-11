@@ -16,6 +16,24 @@ export const getMe = async (req: AuthRequest, res: Response<ApiResponse>, next: 
   }
 }
 
+export const updateProfile = async (
+  req: AuthRequest,
+  res: Response<ApiResponse>,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    if (!req.user) {
+      next(new AppError(401, 'Unauthorized.'))
+      return
+    }
+    const { name, avatarUrl } = req.body as { name?: string; avatarUrl?: string }
+    const user = await userService.updateProfile(req.user.id, { name, avatarUrl })
+    res.json({ success: true, message: 'Profile updated.', data: { user } })
+  } catch (err) {
+    next(err)
+  }
+}
+
 export const addAddress = async (req: AuthRequest, res: Response<ApiResponse>, next: NextFunction): Promise<void> => {
   try {
     if (!req.user) {

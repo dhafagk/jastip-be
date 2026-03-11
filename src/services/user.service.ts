@@ -10,6 +10,12 @@ export const getUserById = async (id: string) => {
   return user
 }
 
+export const updateProfile = async (id: string, data: { name?: string; avatarUrl?: string }) => {
+  const user = await User.findByIdAndUpdate(id, data, { new: true, runValidators: true }).select('-password')
+  if (!user) throw new AppError(404, 'User not found.')
+  return user
+}
+
 // --- Address Management ---
 
 export const addAddress = async (id: string, input: AddressInput) => {

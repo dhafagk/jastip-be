@@ -7,6 +7,7 @@ export interface IProductVariant {
   value: string
   extraPrice: number
   stock: number
+  imageUrl?: string
 }
 
 export interface IReview {
