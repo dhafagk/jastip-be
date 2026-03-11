@@ -18,11 +18,32 @@ export const checkoutCartSchema = z.object({
   }),
 })
 
-export const updateOrderStatusSchema = z.object({
-  body: z.object({
-    status: z.enum(['processing', 'shipped', 'delivered', 'cancelled']),
-  }),
-})
+export const updateOrderStatusSchema = z
+  .object({
+    body: z.object({
+      status: z.enum(['processing', 'shipped', 'delivered', 'cancelled']),
+      courier: z.string().trim().optional(),
+      trackingNumber: z.string().trim().optional(),
+    }),
+  })
+  .superRefine((data, ctx) => {
+    if (data.body.status === 'shipped') {
+      if (!data.body.courier) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'Courier is required when status is shipped',
+          path: ['body', 'courier'],
+        })
+      }
+      if (!data.body.trackingNumber) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'Tracking number is required when status is shipped',
+          path: ['body', 'trackingNumber'],
+        })
+      }
+    }
+  })
 
 export type CheckoutDirectInput = z.infer<typeof checkoutDirectSchema>['body']
 export type CheckoutCartInput = z.infer<typeof checkoutCartSchema>['body']

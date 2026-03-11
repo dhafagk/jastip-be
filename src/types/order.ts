@@ -20,6 +20,8 @@ export interface IOrder extends Document {
   grandTotal: number
   shippingAddress: IAddress
   status: OrderStatus
+  courier?: string
+  trackingNumber?: string
   notes?: string
   createdAt: Date
   updatedAt: Date

@@ -61,6 +61,8 @@ const orderSchema = new Schema<IOrder>(
       required: true,
       index: true,
     },
+    courier: { type: String, trim: true },
+    trackingNumber: { type: String, trim: true },
     notes: { type: String, trim: true },
   },
   { timestamps: true }

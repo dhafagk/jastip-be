@@ -215,11 +215,20 @@ export const getSellerOrders = async (sellerId: string) => {
     .sort({ createdAt: -1 })
 }
 
-export const updateOrderStatus = async (orderId: string, sellerId: string, status: string) => {
+export const updateOrderStatus = async (
+  orderId: string,
+  sellerId: string,
+  status: string,
+  courier?: string,
+  trackingNumber?: string
+) => {
   const order = await Order.findOne({ _id: orderId, sellerId })
   if (!order) throw new AppError(404, 'Order not found for this seller.')
 
   order.status = status as any
+  if (courier) order.courier = courier
+  if (trackingNumber) order.trackingNumber = trackingNumber
+
   await order.save()
   return order
 }
