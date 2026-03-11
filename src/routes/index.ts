@@ -4,6 +4,7 @@ import userRoutes from './users'
 import sellerRoutes from './sellers'
 import productRoutes from './products'
 import cartRoutes from './cart'
+import orderRoutes from './orders'
 
 const router = Router()
 
@@ -53,6 +54,14 @@ router.get('/', (_req: Request, res: Response) => {
           remove: 'DELETE /cart/:itemId  [requires customer Bearer token]',
           clear: 'DELETE /cart  [requires customer Bearer token]',
         },
+        orders: {
+          checkoutDirect: 'POST /orders/checkout/direct  [requires customer Bearer token]',
+          checkoutCart: 'POST /orders/checkout/cart  [requires customer Bearer token]',
+          getMyOrders: 'GET /orders/me  [requires customer Bearer token]',
+          processPayment: 'POST /orders/:id/payment  [requires customer Bearer token]',
+          getSellerOrders: 'GET /orders/seller/:sellerId  [requires seller/admin Bearer token]',
+          updateStatus: 'PATCH /orders/:id/status  [requires seller Bearer token]',
+        },
       },
     },
   })
@@ -63,5 +72,6 @@ router.use('/users', userRoutes)
 router.use('/sellers', sellerRoutes)
 router.use('/products', productRoutes)
 router.use('/cart', cartRoutes)
+router.use('/orders', orderRoutes)
 
 export default router
