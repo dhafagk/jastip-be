@@ -1,6 +1,13 @@
 import { Types, Document } from 'mongoose'
 
-export type ProductStatus = 'available' | 'ordered' | 'onTheWay' | 'delivered' | 'cancelled'
+export type ProductStatus =
+  | 'available'
+  | 'ordered'
+  | 'purchasing'
+  | 'arrived_locally'
+  | 'onTheWay'
+  | 'delivered'
+  | 'cancelled'
 
 export interface IProductVariant {
   name: string
@@ -37,6 +44,9 @@ export interface IProduct extends Document {
   tags: string[]
   totalSold: number
   isAvailableForOrder: boolean
+  isPreOrder: boolean
+  poCloseDate?: Date
+  estimatedDeliveryDate?: Date
   createdAt: Date
   updatedAt: Date
 }

@@ -27,6 +27,9 @@ export const createProductSchema = z.object({
   variants: z.array(variantSchema).default([]),
   tags: z.array(z.string()).default([]),
   isAvailableForOrder: z.boolean().default(true),
+  isPreOrder: z.boolean().default(false),
+  poCloseDate: z.string().datetime().optional(),
+  estimatedDeliveryDate: z.string().datetime().optional(),
 })
 
 export const updateProductSchema = createProductSchema
@@ -58,6 +61,7 @@ export const listProductsQuerySchema = z.object({
     .regex(/^\d+(\.\d+)?$/, 'maxPrice must be a number')
     .optional(),
   isAvailableForOrder: z.enum(['true', 'false']).optional(),
+  isPreOrder: z.enum(['true', 'false']).optional(),
   page: z
     .string()
     .regex(/^[1-9]\d*$/, 'page must be a positive integer')

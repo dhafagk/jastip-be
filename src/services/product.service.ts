@@ -33,6 +33,9 @@ export const listProducts = async (query: ListProductsQuery) => {
   if (query.isAvailableForOrder !== undefined) {
     filter['isAvailableForOrder'] = query.isAvailableForOrder === 'true'
   }
+  if (query.isPreOrder !== undefined) {
+    filter['isPreOrder'] = query.isPreOrder === 'true'
+  }
 
   const priceFilter: Record<string, number> = {}
   if (query.minPrice !== undefined) {

@@ -81,7 +81,7 @@ const productSchema = new Schema<IProduct>(
     },
     status: {
       type: String,
-      enum: ['available', 'ordered', 'onTheWay', 'delivered', 'cancelled'],
+      enum: ['available', 'ordered', 'purchasing', 'arrived_locally', 'onTheWay', 'delivered', 'cancelled'],
       required: true,
       default: 'available',
       index: true,
@@ -106,6 +106,18 @@ const productSchema = new Schema<IProduct>(
       required: true,
       default: true,
       index: true,
+    },
+    isPreOrder: {
+      type: Boolean,
+      required: true,
+      default: false,
+      index: true,
+    },
+    poCloseDate: {
+      type: Date,
+    },
+    estimatedDeliveryDate: {
+      type: Date,
     },
   },
   { timestamps: true }

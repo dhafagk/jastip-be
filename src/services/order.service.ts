@@ -222,7 +222,8 @@ export const updateOrderStatus = async (
   sellerId: string,
   status: string,
   courier?: string,
-  trackingNumber?: string
+  trackingNumber?: string,
+  proofImageUrl?: string
 ) => {
   const order = await Order.findOne({ _id: orderId, sellerId })
   if (!order) throw new AppError(404, 'Order not found for this seller.')
@@ -230,6 +231,7 @@ export const updateOrderStatus = async (
   order.status = status as any
   if (courier) order.courier = courier
   if (trackingNumber) order.trackingNumber = trackingNumber
+  if (proofImageUrl) order.imageProofs.push(proofImageUrl)
 
   await order.save()
   return order

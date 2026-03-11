@@ -21,9 +21,10 @@ export const checkoutCartSchema = z.object({
 export const updateOrderStatusSchema = z
   .object({
     body: z.object({
-      status: z.enum(['processing', 'shipped', 'delivered', 'cancelled']),
+      status: z.enum(['processing', 'purchasing', 'arrived_locally', 'shipped', 'delivered', 'cancelled']),
       courier: z.string().trim().optional(),
       trackingNumber: z.string().trim().optional(),
+      proofImageUrl: z.string().url('Proof image must be a valid URL').optional(),
     }),
   })
   .superRefine((data, ctx) => {
@@ -40,6 +41,15 @@ export const updateOrderStatusSchema = z
           code: z.ZodIssueCode.custom,
           message: 'Tracking number is required when status is shipped',
           path: ['body', 'trackingNumber'],
+        })
+      }
+    }
+    if (data.body.status === 'purchasing' || data.body.status === 'arrived_locally') {
+      if (!data.body.proofImageUrl) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'A proofImageUrl is required to update to this status for transparency',
+          path: ['body', 'proofImageUrl'],
         })
       }
     }

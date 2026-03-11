@@ -56,10 +56,14 @@ const orderSchema = new Schema<IOrder>(
     },
     status: {
       type: String,
-      enum: ['pending', 'processing', 'shipped', 'delivered', 'cancelled'],
+      enum: ['pending', 'processing', 'purchasing', 'arrived_locally', 'shipped', 'delivered', 'cancelled'],
       default: 'pending',
       required: true,
       index: true,
+    },
+    imageProofs: {
+      type: [String],
+      default: [],
     },
     courier: { type: String, trim: true },
     trackingNumber: { type: String, trim: true },
