@@ -3,6 +3,8 @@ import Order from '../models/Order'
 import Product from '../models/Product'
 import Cart from '../models/Cart'
 import User from '../models/User'
+import Seller from '../models/Seller'
+import WalletTransaction from '../models/WalletTransaction'
 import { AppError } from '../types'
 import { CheckoutCartInput, CheckoutDirectInput } from '../validators/order.validator'
 
@@ -282,8 +284,26 @@ export const completeOrder = async (orderId: string, userId: string) => {
     throw new AppError(400, 'Only shipped orders can be marked as delivered/completed.')
   }
 
+  // Update order status
   order.status = 'delivered'
   await order.save()
+
+  // Reward the seller
+  const seller = await Seller.findById(order.sellerId)
+  if (!seller) throw new AppError(404, 'Seller not found during order completion.')
+
+  const earningAmount = order.totalProductPrice + order.totalServiceFee
+  seller.balance += earningAmount
+  await seller.save()
+
+  // Record the earning
+  await WalletTransaction.create({
+    sellerId: seller._id,
+    orderId: order._id,
+    type: 'earning',
+    amount: earningAmount,
+    status: 'completed',
+  })
 
   return order
 }

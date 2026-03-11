@@ -58,6 +58,12 @@ const sellerSchema = new Schema<ISeller>(
       default: false,
       index: true,
     },
+    balance: {
+      type: Number,
+      required: true,
+      min: [0, 'Balance cannot be negative'],
+      default: 0,
+    },
     addresses: { type: [addressSchema], default: [] },
   },
   { timestamps: true }

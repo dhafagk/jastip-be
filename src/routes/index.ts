@@ -5,6 +5,7 @@ import sellerRoutes from './sellers'
 import productRoutes from './products'
 import cartRoutes from './cart'
 import orderRoutes from './orders'
+import walletRoutes from './wallet'
 
 const router = Router()
 
@@ -65,6 +66,10 @@ router.get('/', (_req: Request, res: Response) => {
           updateStatus:
             'PATCH /orders/:id/status  [requires seller Bearer token, body: { status, courier?, trackingNumber? }]',
         },
+        wallet: {
+          getMe: 'GET /wallet/me  [requires seller Bearer token]',
+          withdraw: 'POST /wallet/withdraw  [requires seller Bearer token]',
+        },
       },
     },
   })
@@ -76,5 +81,6 @@ router.use('/sellers', sellerRoutes)
 router.use('/products', productRoutes)
 router.use('/cart', cartRoutes)
 router.use('/orders', orderRoutes)
+router.use('/wallet', walletRoutes)
 
 export default router

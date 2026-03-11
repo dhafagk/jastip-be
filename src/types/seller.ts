@@ -8,5 +8,6 @@ export interface ISeller extends Document {
   rating: number
   totalTransactions: number
   isVerified: boolean
+  balance: number
   addresses: Types.DocumentArray<IAddress>
 }
