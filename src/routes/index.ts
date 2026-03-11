@@ -22,6 +22,10 @@ router.get('/', (_req: Request, res: Response) => {
         },
         users: {
           me: 'GET /users/me  [requires Bearer token]',
+          addAddress: 'POST /users/me/addresses  [requires Bearer token]',
+          updateAddress: 'PATCH /users/me/addresses/:addressId  [requires Bearer token]',
+          setDefaultAddress: 'PATCH /users/me/addresses/:addressId/default  [requires Bearer token]',
+          removeAddress: 'DELETE /users/me/addresses/:addressId  [requires Bearer token]',
         },
         sellers: {
           list: 'GET /sellers  [?city=&isVerified=&minRating=&page=&limit=]',
@@ -29,6 +33,10 @@ router.get('/', (_req: Request, res: Response) => {
           create: 'POST /sellers  [requires Bearer token]',
           update: 'PATCH /sellers/:id  [requires Bearer token]',
           delete: 'DELETE /sellers/:id  [requires Bearer token]',
+          addAddress: 'POST /sellers/:id/addresses  [requires seller Bearer token]',
+          updateAddress: 'PATCH /sellers/:id/addresses/:addressId  [requires seller Bearer token]',
+          setDefaultAddress: 'PATCH /sellers/:id/addresses/:addressId/default  [requires seller Bearer token]',
+          removeAddress: 'DELETE /sellers/:id/addresses/:addressId  [requires seller Bearer token]',
         },
         products: {
           list: 'GET /products  [?category=&status=&sellerId=&originCity=&tag=&minPrice=&maxPrice=&isAvailableForOrder=&page=&limit=]',
